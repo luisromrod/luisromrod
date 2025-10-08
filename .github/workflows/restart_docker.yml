@@ -1,0 +1,25 @@
+# This is a basic workflow to help you restart dockers
+
+name: Reiniciar contenedor Docker manager-api-gateway
+
+on:
+  workflow_dispatch:  # Permite ejecutarlo manualmente
+  
+jobs:
+  restart-container:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Detener contenedor
+        run: |
+           docker stop manager-api-gateway
+      - name: Esperar 15 segundos
+        run: sleep 15
+
+      - name: Iniciar contenedor
+        run: |
+           docker start manager-api-gateway
+        
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
