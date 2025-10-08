@@ -10,7 +10,19 @@ jobs:
 
     # Pasos a ejecutar
     steps:
-      
+
+      - name: Revisar conexion
+        uses: actions/checkuot@v4
+
+      - name: Conexion a vmcontainer via ssh
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: 10.34.7.172
+          username: root
+          password: Fu114cce$$#.
+          port: 22
+          script: |
+            cd /root
       - name: Detener contenedor
         run: |
           echo "Deteniendo contenedor"
