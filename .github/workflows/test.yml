@@ -1,4 +1,4 @@
-name: Test self-hosted runner 2
+name: Test self-hosted runner 3
  
 # Este workflow se ejecuta manualmente desde GitHub
 on:
