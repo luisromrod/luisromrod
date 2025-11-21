@@ -1,0 +1,38 @@
+name: despliegue_remoto self-hosted runner
+on:
+  push:
+    branches:
+      - main # O la rama que desees
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_170}} # Tu nombre de host
+          username: ${{secrets.SSH_USERNAME_170}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+          script: |
+            echo "### path servidor 170 ###"
+            cd /home/GIT
+            pwd
+            ls -lrt 
+            echo "###  respaldo del repositorio del servidor ###"
+            mv sa-wfm-datahub-api /home/GIT/sa-wfm-datahub-api_$(date +'%Y%m%d-%H%M')
+            ls -lrt 
+            echo '### Clonar el repositorio sa-wfm-datahub-api ###'
+            git clone -b main https://${{secrets.GH_ACCESS_KEY}}@github.com/jeacor/sa-wfm-datahub-api.git
+            echo '### Repositorio clonado ###' 
+            ls -lrt
+            sleep 40
+            echo '### fin del workflow ###'
