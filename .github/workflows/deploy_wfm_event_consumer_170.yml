@@ -1,0 +1,57 @@
+name: despliegue_remoto self-hosted runner
+on:
+  push:
+    branches:
+      - main # O la rama que desees
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_170}} # Tu nombre de host
+          username: ${{secrets.SSH_USERNAME_170}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+          script: |
+            echo "### path servidor 170 ###"
+            cd /home/GIT
+            pwd
+            ls -lrt 
+            echo "###  respaldo del repositorio del servidor ###"
+            mv sa-wfm-event-consumer-svc /home/GIT/sa-wfm-event-consumer-svc_$(date +'%Y%m%d-%H%M')
+            ls -lrt 
+            echo '### Clonar el repositorio sa-wfm-event-consumer-svc ###'
+            git clone -b pet-2025 https://${{secrets.GH_ACCESS_KEY}}@github.com/jeacor/sa-wfm-event-consumer-svc.git
+            echo '### Repositorio clonado ###' 
+            ls -lrt
+            sleep 40
+            echo '### Detener y eliminar el Contenedor wfm-event-consumer ###'
+            docker ps
+            docker stop wfm-event-consumer
+            sleep 40
+            docker rm wfm-event-consumer
+            echo '### eliminimar la imagen ###'
+            docker images
+            sleep 40
+            docker rmi wfm-event-consumer
+            docker images
+            echo '### Ejecutar el build y el deploy ###'
+            cd /home/GIT/sa-wfm-event-consumer-svc
+            ls -lrt
+            docker build -t wfm-event-consumer .
+            sleep 40
+            docker run -d -p 8082:8080 --name wfm-event-consumer wfm-event-consumer
+            sleep 20
+            echo '### contenedores corriendo ###'
+            docker ps -a
+            echo '### fin del workflow ###'
