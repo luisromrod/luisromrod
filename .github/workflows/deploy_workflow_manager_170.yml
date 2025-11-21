@@ -1,0 +1,39 @@
+name: despliegue_remoto self-hosted runner
+on:
+  push:
+    branches:
+      - main # O la rama que desees
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_172}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_172}} # Tu nombre de host
+          username: ${{secrets.SSH_USERNAME_172}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_172}} # Clave privada
+          script: |
+            echo "### path servidor 172 ###"
+            cd /home/GIT
+            pwd
+            ls -lrt 
+            echo "###  respaldo del repositorio del wfm-service  ###"
+            mv SI-B-WORK%20FLOW%20MANAGER%20BACK-2025 /home/GIT/SI-B-WORK%20FLOW%20MANAGER%20BACK-2025_$(date +'%Y%m%d-%H%M')
+            ls -lrt 
+            echo '### Clonar el repositorio wfm-service  ###'
+            git clone -b pet-docker http://${{secrets.USERNAME_JALS}}:${{secrets.PASSWORD_JALS}}@intradsa.seccionamarilla.com:8181/tfs/SISTEMAS_INTERNET/_git/SI-B-WORK%20FLOW%20MANAGER%20BACK-2025
+            sleep 3
+            echo '### Repositorio clonado ###' 
+            ls -lrt
+            
+            echo '### fin del workflow ###'
