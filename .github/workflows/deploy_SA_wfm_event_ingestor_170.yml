@@ -1,0 +1,57 @@
+name: despliegue_remoto self-hosted runner
+on:
+  push:
+    branches:
+      - main # O la rama que desees
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_170}} # Tu nombre de host
+          username: ${{secrets.SSH_USERNAME_170}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_170}} # Clave privada
+          script: |
+            echo "### path servidor 170 ###"
+            cd /home/GIT
+            pwd
+            ls -lrt 
+            echo "###  respaldo del repositorio del servidor ###"
+            mv sa-wfm-event-ingestor-svc /home/GIT/sa-wfm-event-ingestor-svc_$(date +'%Y%m%d-%H%M')
+            ls -lrt 
+            echo '### Clonar el repositorio sa-wfm-event-ingestor-svc ###'
+            git clone -b main https://${{secrets.GH_ACCESS_KEY_HGH}}@github.com/hectorGutierrez90/sa-wfm-event-ingestor-svc.git
+            echo '### Repositorio clonado ###' 
+            ls -lrt
+            sleep 40
+            echo '### Detener y eliminar el Contenedor wfm-producer ###'
+            docker ps
+            docker stop wfm-producer
+            sleep 40
+            docker rm wfm-producer
+            echo '### elimininar la imagen ###'
+            docker images
+            sleep 40
+            docker rmi wfm-producer
+            docker images
+            echo '### Ejecutar el build y el deploy ###'
+            cd /home/GIT/sa-wfm-event-ingestor-svc/WFM.DataHub
+            ls -lrt
+            docker build -t wfm-producer .
+            sleep 40
+            docker run -d -p 5000:8080 -v dataprotection-keys:/root/.aspnet/DataProtection-Keys --name wfm-producer-app wfm-producer
+            sleep 20
+            echo '### contenedores corriendo ###'
+            docker ps -a
+            echo '### fin del workflow ###'
