@@ -1,4 +1,4 @@
-name: despliegue_remoto self-hosted runner
+name: rem deploy self-hosted runner
 on:
   push:
     branches:
