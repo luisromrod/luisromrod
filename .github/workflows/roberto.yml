@@ -4,7 +4,7 @@ on:
 
 jobs:
   create_file:
-    runs-on: [self-hosted, linux]
+    runs-on: [self-hosted, linux, test-deploy]
     
     steps:
       - name: Conectar a 172 y crear archivo
