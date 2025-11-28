@@ -1,0 +1,22 @@
+name: Crear archivo Roberto
+on:
+  workflow_dispatch: # Ejecución manual
+
+jobs:
+  create_file:
+    runs-on: [self-hosted, linux]
+    
+    steps:
+      - name: Conectar a 172 y crear archivo
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_172 }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY_172 }}
+          script: |
+            echo "Conectado a $(hostname)"
+            # Asegurarse de que la carpeta existe (opcional, pero recomendado)
+            cd CICD
+            echo "Creando archivo roberto.txt..."
+            echo "Archivo creado por GitHub Actions el $(date)" > roberto.txt
+            ls -l roberto.txt
