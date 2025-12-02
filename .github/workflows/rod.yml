@@ -1,0 +1,26 @@
+name: dockpsa salida en texto plano
+on:
+  workflow_dispatch: # Ejecución manual
+
+jobs:
+  create_file:
+    runs-on: [self-hosted, linux, test-deploy]
+    
+    steps:
+      - name: Conectar a 172 y crear archivo
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST_172 }}
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY_172 }}
+          script: |
+            echo "Conectado a $(hostname)"
+            # cambiando directorio CICD
+            cd CICD
+            echo "Creando archivo dockpsa.txt..."
+            echo "Archivo creado por GitHub Actions el $(date)" > dockpsa.txt
+            echo "" >> dockpsa.txt
+            docker ps -a >> dockpsa.txt
+            ls -l dockpsa.txt
+            # Enviar archivo por correo
+            mail -s "Salida Docker PS" rbecerra@seccionamarilla.com < dockpsa.txt
