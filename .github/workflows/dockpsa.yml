@@ -17,7 +17,8 @@ jobs:
             echo "Conectado a $(hostname)"
             # cambiando directorio CICD
             cd CICD
-            docker ps -a > dockpsa.txt
             echo "Creando archivo dockpsa.txt..."
             echo "Archivo creado por GitHub Actions el $(date)" > dockpsa.txt
+            echo "" >> dockpsa.txt
+            docker ps -a >> dockpsa.txt
             ls -l dockpsa.txt
