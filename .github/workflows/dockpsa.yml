@@ -23,4 +23,4 @@ jobs:
             docker ps -a >> dockpsa.txt
             ls -l dockpsa.txt
             # Enviar archivo por correo
-            mail -s "Salida Docker PS" luis.romero@seccionamarilla.com < dockpsa.txt
+            mail -s "Salida Docker PS" rbecerra@seccionamarilla.com < dockpsa.txt
