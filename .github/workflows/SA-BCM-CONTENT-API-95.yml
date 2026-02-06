@@ -24,11 +24,11 @@ jobs:
           key: ${{secrets.SSH_PRIVATE_KEY_95}} # Clave privada
           script: |
             echo "### Path servidor 95 ###"
-            cd /home/GIT
+            cd /adsaenv/adsa/app/adsaweb
             pwd
             ls -lrt 
             echo "### Respaldo de la carpeta sa-bcm-content-api ###"
-            mv sa-bcm-content-api /home/GIT/sa-bcm-content-api_$(date +'%Y%m%d-%H%M')
+            mv sa-bcm-content-api /adsaenv/adsa/app/adsaweb/sa-bcm-content-api_$(date +'%Y%m%d-%H%M')
             ls -lrt 
             echo '### Clonar el repositorio sa-bcm-content-api ###'
             git clone -b main https://${{secrets.GH_ACCESS_KEY}}@github.com/jeacor/sa-bcm-content-api.git
@@ -46,7 +46,7 @@ jobs:
             docker rmi bcm-api-app
             docker images
             echo '### Ejecutar el build y el deploy ###'
-            cd  /home/GIT/sa-bcm-content-api
+            cd  /adsaenv/adsa/app/adsaweb/sa-bcm-content-api
             ls -lrt
             docker build -t bcm-api-app .
             sleep 20
