@@ -1,0 +1,57 @@
+name:  95 --  sa-bcm-content-api --
+on:
+  workflow_dispatch:
+    branches:
+      - main # Aqui va la rama
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_95}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_95}} 	# Nombre de host
+          username: ${{secrets.SSH_USERNAME_95}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_95}} # Clave privada
+          script: |
+            echo "### Path servidor 95 ###"
+            cd /home/GIT
+            pwd
+            ls -lrt 
+            echo "### Respaldo de la carpeta sa-bcm-content-api ###"
+            mv sa-bcm-content-api /home/GIT/sa-bcm-content-api_$(date +'%Y%m%d-%H%M')
+            ls -lrt 
+            echo '### Clonar el repositorio sa-bcm-content-api ###'
+            git clone -b main https://${{secrets.GH_ACCESS_KEY}}@github.com/jeacor/sa-bcm-content-api.git
+            echo '### Repositorio clonado ###' 
+            ls -lrt
+            sleep 20
+            echo '### Detener y eliminar el Contenedor sa-bcm-content-api ###'
+            docker ps
+            docker stop bcm-api-container
+            sleep 20
+            docker rm bcm-api-container
+            echo '### eliminimar la imagen ###'
+            docker images
+            sleep 40
+            docker rmi bcm-api-app
+            docker images
+            echo '### Ejecutar el build y el deploy ###'
+            cd  /home/GIT/sa-bcm-content-api
+            ls -lrt
+            docker build -t bcm-api-app .
+            sleep 20
+            docker run -d -p 4400:8080 -v dataprotection-keys:/root/.aspnet/DataProtection-Keys --name bcm-api-container bcm-api-app
+            sleep 20
+            echo '### contenedores corriendo ###'
+            docker ps -a
+            echo '### fin del workflow ###'
