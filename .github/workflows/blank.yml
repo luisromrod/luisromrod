@@ -1,0 +1,49 @@
+name:  95 --  PRUEBA-CONEXION --
+on:
+  workflow_dispatch:
+    branches:
+      - main # Aqui va la rama
+jobs:
+  deploy:
+    runs-on: [self-hosted, linux]
+
+    steps:
+      - name: Copiar código
+        uses: actions/checkout@v3
+
+      - name: Añadir clave SSH al agente
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+         ssh-private-key: ${{secrets.SSH_PRIVATE_KEY_95}} # Clave privada
+
+      - name: Conectar y ejecutar comandos en el servidor
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{secrets.SSH_HOST_95}} 	# Nombre de host
+          username: ${{secrets.SSH_USERNAME_95}} # nombre de usuario
+          key: ${{secrets.SSH_PRIVATE_KEY_95}} # Clave privada
+          script: |
+            echo "### Path servidor 95 ###"
+            pwd
+            ls -lrt 
+            echo "### Respaldo de la carpeta sa-bcm-content-api ###"
+
+      - name: Enviar notificación a Teams
+        # Este paso solo se ejecuta si los pasos y el script anterior fueron exitosos
+        if: success() 
+        env:
+          TEAMS_WEBHOOK: ${{ secrets.TEAMS_WEBHOOK_URL }}
+        run: |
+          JSON_PAYLOAD=$(jq -n \
+            --arg title "✅ Despliegue Exitoso: sa-bcm-content-api" \
+            --arg text "El despliegue en el **Servidor 95** finalizó correctamente desde la rama **${{ github.ref_name }}** por el usuario **${{ github.actor }}**." \
+            '{
+              "@type": "MessageCard",
+              "@context": "http://schema.org/extensions",
+              "themeColor": "00e676",
+              "summary": "Despliegue Exitoso",
+              "title": $title,
+              "text": $text
+            }')
+            
+          curl -H "Content-Type: application/json" -d "$JSON_PAYLOAD" $TEAMS_WEBHOOK
