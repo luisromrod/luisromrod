@@ -1,4 +1,4 @@
-name:  95 --  PRUEBA-CONEXION --
+name:  TEST_NOTIFICACIONES_TEAMS --
 on:
   workflow_dispatch:
     branches:
